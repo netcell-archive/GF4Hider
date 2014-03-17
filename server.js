@@ -1,8 +1,8 @@
 'use strict';
-require('nodetime').profile({
-	accountKey: '2ef82cccaaecd093016b411c09c7fec4c66e5509', 
-	appName: 'Node.js Application'
-});
+// require('nodetime').profile({
+// 	accountKey: '2ef82cccaaecd093016b411c09c7fec4c66e5509', 
+// 	appName: 'Node.js Application'
+// });
 var express = require('express');
 
 /**
