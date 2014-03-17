@@ -1,0 +1,73 @@
+<div class="container">
+  <div class="block">
+    <div class="title">EMBED</div>
+    <div class="file">
+        <div class="drop" file="cover">
+          <div ng-if="!cover_name">Drop or choose an png file here</div>
+          <img ng-show="cover_name" src="{{cover_src}}" image="cover_img"></img>
+        </div>
+        <div class="seperator"></div>
+        <div class="drop" file="info">
+          <div ng-if="notpaletted">Please choose a paletted png on the right side box</div>
+          <div ng-if="!notpaletted && !info_name">Drop or choose a file here</div>
+          <div ng-if="!notpaletted && cover_max_info_size">Max file size {{cover_max_info_size}} b</div>
+          <div ng-if="!notpaletted && info_name">{{info_name}}</div>
+        </div>
+    </div>
+    <div class="result" ng-if="embed_tasks.length">
+      <div class="title row">
+        <span class="col width even">width</span>
+        <span class="col height odd">height</span>
+        <span class="col size even">size</span>
+        <span class="col link odd">link</span>
+        <span class="col psnr even">psnr</span>
+      </div>
+      <div class="row" ng-repeat="task in embed_tasks track by $index">
+        <span class="col width even">{{task.width}} px</span>
+        <span class="col height odd">{{task.height}} px</span>
+        <span class="col size even">{{task.size}} b</span>
+        <span class="col link odd">
+          <a href={{task.link}} ng-show="task.link">download</a>
+          <span class="fail" ng-show="task.fail">{{task.fail}}</span>
+          <span class="fail" ng-show="!task.fail && !task.link">Processing...</span>
+        </span>
+        <span class="col psnr even">{{task.psnr.toFixed(1)}}</span>
+      </div>
+      <div class="title row">
+        <span class="col width even"></span>
+        <span class="col height odd"></span>
+        <span class="col size even"></span>
+        <span class="col link odd">average</span>
+        <span class="col psnr even">{{avg_psnr.toFixed(1)}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="title">EXTRACT</div>
+    <div class="file">
+        <div class="drop" file="container">
+          <span ng-if="!container_name">Drop or choose an png file here</span>
+          <img ng-show="container_name" src="{{container_src}}" image="container_img"></img>
+        </div>
+    </div>
+    <div class="result" ng-if="decode_tasks.length">
+      <div class="title row">
+        <span class="col width even">width</span>
+        <span class="col height odd">height</span>
+        <span class="col link odd">link</span>
+        <span class="col size even">size</span>
+      </div>
+      <div class="row" ng-class="{fail: task.fail}" ng-repeat="task in decode_tasks track by $index">
+        <span class="col width even">{{task.width}} px</span>
+        <span class="col height odd">{{task.height}} px</span>
+        <span class="col link odd">
+          <a href={{task.link}} ng-show="task.link">download</a>
+          <span class="fail" ng-show="task.fail">{{task.fail}}</span>
+          <span class="fail" ng-show="!task.fail && !task.link">Processing...</span>
+        </span>
+        <span class="col size even" ng-show="task.size">{{task.size}} b</span>
+      </div>
+    </div>
+  </div>
+</div>
