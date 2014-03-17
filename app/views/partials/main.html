@@ -66,7 +66,7 @@
           <span class="fail" ng-show="task.fail">{{task.fail}}</span>
           <span class="fail" ng-show="!task.fail && !task.link">Processing...</span>
         </span>
-        <span class="col size even" ng-show="task.size">{{task.size}} b</span>
+        <span class="col size even">{{task.size}} <span ng-show="task.size">b</span></span>
       </div>
     </div>
   </div>
