@@ -33,9 +33,8 @@ var Packer = module.exports = function(options) {
     Stream.call(this);
 
     this._options = options;
-	options.bitDepth = options.bitDepth || 8;
-	options.colorType = (typeof options.colorType=="number")? options.colorType : 6;
-	options.deflateChunkSize = options.deflateChunkSize || 32 * 1024;
+
+    options.deflateChunkSize = options.deflateChunkSize || 32 * 1024;
     options.deflateLevel = options.deflateLevel || 9;
     options.deflateStrategy = options.deflateStrategy || 3;
 
@@ -48,15 +47,12 @@ Packer.prototype.pack = function(data, width, height, palette) {
 
     // Signature
     this.emit('data', new Buffer(constants.PNG_SIGNATURE));
-    this.emit('data', this._packIHDR(width, height, this._options.bitDepth, this._options.colorType));
-
-	//if(this._options.colorType==3){
-		this.emit('data', this._packPLTE(palette));
-	//}
+    this.emit('data', this._packIHDR(width, height));
+    //this.emit('data', this._packPLTE(palette));
 
     // filter pixel data
-    var filter = new Filter(width, height, colorTypeToBppMap[this._options.colorType], data, this._options);
-    this._data = filter.filter();
+    var filter = new Filter(width, height, 4, data, this._options);
+    var data = filter.filter();
 
     // compress it
     var deflate = zlib.createDeflate({
@@ -75,7 +71,7 @@ Packer.prototype.pack = function(data, width, height, palette) {
         this.emit('end');
     }.bind(this));
 
-    deflate.end(this._data);
+    deflate.end(data);
 };
 
 Packer.prototype._packChunk = function(type, data) {
@@ -92,17 +88,35 @@ Packer.prototype._packChunk = function(type, data) {
     return buf;
 };
 
-Packer.prototype._packIHDR = function(width, height, bitDepth, colorType) {
+Packer.prototype._packIHDR = function(width, height) {
+
     var buf = new Buffer(13);
     buf.writeUInt32BE(width, 0);
     buf.writeUInt32BE(height, 4);
-    buf[8] = bitDepth;
-    buf[9] = colorType; // colorType
+    buf[8] = 8;
+    buf[9] = 6; // colorType
     buf[10] = 0; // compression
     buf[11] = 0; // filter
     buf[12] = 0; // interlace
 
     return this._packChunk(constants.TYPE_IHDR, buf);
+};
+
+Packer.prototype._packPLTE = function(palette){
+    var len = palette.length * 3,
+        buf = new Buffer(len + 12);
+
+    buf.writeUInt32BE(len, 0);
+    buf.writeUInt32BE(constants.TYPE_PLTE, 4);
+    var offset = 8;
+    for (var i = 0; i < palette.length; i++) {
+        buf.writeUInt8(palette[i][0], offset++);
+        buf.writeUInt8(palette[i][1], offset++);
+        buf.writeUInt8(palette[i][2], offset++);
+    };
+
+    buf.writeInt32BE(CrcStream.crc32(buf.slice(4, buf.length - 4)), buf.length - 4);
+    return buf;
 };
 
 Packer.prototype._packIDAT = function(data) {
@@ -111,55 +125,4 @@ Packer.prototype._packIDAT = function(data) {
 
 Packer.prototype._packIEND = function() {
     return this._packChunk(constants.TYPE_IEND, null);
-};
-var colorTypeToBppMap = {
-	0: 1,
-	2: 3,
-	3: 1,
-	4: 2,
-	6: 4
-};
-
-Packer.prototype._packPLTE = function(palette) {
-    var buf = new Buffer(palette.length*3), offset = 0;;
-    for (var i = 0; i < palette.length; i++) {
-        buf.writeUInt8(palette[i][0], offset++);
-        buf.writeUInt8(palette[i][1], offset++);
-        buf.writeUInt8(palette[i][2], offset++);
-    };
-
-	// var k,
-	// 	newData=new Buffer(data.length),
-	// 	buf = new Buffer(256*3),
-	// 	count;
-	// for(k=0;;k++){
-	// 	var palette={};
-	// 	count= 0;
-	// 	for(var i=data.length/4-1;i>=0;i--){//find all colors
-	// 		if(data[i*4+3]<0x80){//opacity<50% treat as  transparent
-	// 			if(palette._===undefined){
-	// 				palette._=(count++);
-	// 				if(count>256){break;}
-	// 			}
-	// 			newData[i*4]=palette._;
-	// 		}
-	// 		else{
-	// 			var colorR =(data[i*4+0]>>k)<<k,
-	// 				colorG =(data[i*4+1]>>k)<<k,
-	// 				colorB =(data[i*4+2]>>k)<<k,
-	// 				color=(colorR<<16)+(colorG<<8)+colorB;
-	// 			if(palette[color]===undefined){
-	// 				palette[color]=(count++);
-	// 				if(count>256){break;}
-	// 			}
-	// 			newData[i*4]=palette[color];
-	// 			buf[palette[color]*3+0]=colorR;
-	// 			buf[palette[color]*3+1]=colorG;
-	// 			buf[palette[color]*3+2]=colorB;
-	// 		}
-	// 	}
-	// 	if(count<=256){break;}
-	// }
-	// newData.copy(data);
-	return this._packChunk(constants.TYPE_PLTE, buf);
 };

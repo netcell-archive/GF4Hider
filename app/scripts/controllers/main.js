@@ -154,14 +154,19 @@ angular.module('se10th20132App')
 	    	}, function(data){
 	    		switch(data.data.message){
 	    			case 'WRONG_FILE':
+                        task.fail = 'Wrong file!';
+                        break;
 	    			case 'WRONG_FILE_TYPE':
+                        task.fail = 'Wrong file type!';
+                        break;
 	    			case 'NOT_PALETTED':
-	    				task.fail = 'Wrong file!';
+	    				task.fail = 'Image not paletted!';
 	    				break;
 	    			default:
 	    				task.fail = 'Unknown error!';
 	    				break;
 	    		}
+                if (data.data.error) console.log(data.data.error)
 	    	});
     	}
     }
