@@ -30,11 +30,16 @@ angular.module('se10th20132App')
             	$scope.cover_width = imwidth;
             	$scope.cover_height = imheight;
             	$scope.cover_max_info_size = maxhide(imwidth, imheight, 5, 4);
+                if ($scope.cover_name.substring($scope.cover_name.length-4, $scope.cover_name.length) !== ".png") {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = imwidth;
+                    canvas.height = imheight;
+                    var context = canvas.getContext('2d');
+                    context.drawImage(img, 0, 0, imwidth, imheight);
+                    $scope.coverDataURL = canvas.toDataURL();
+                    console.log($scope.coverDataURL);
+                }
             	$scope.$apply();
-
-			 	var context = $scope.cover_canvas.getContext('2d');
-			 	context.clearRect(0,0,cvwidth,cvheight);
-			 	context.drawImage(img, 0, (cvheight - scheight) / 2, scwidth, scheight);
 			};
 			$scope.cover_src = $scope.coverDataURL;
 			img.src = $scope.coverDataURL;
