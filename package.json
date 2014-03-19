@@ -11,7 +11,7 @@
     "underscore": "~1.6.0",
     "colors": "~0.6.2",
     "async": "~0.2.10",
-    "q": "~1.0.0",
+    "q": "~1.0.1",
     "args-js": "~0.10.4",
     "clim": "~1.0.0",
     "node-uuid": "~1.4.1",
@@ -21,7 +21,9 @@
     "pngjs": "~0.4.0",
     "archiver": "~0.6.1",
     "nodetime": "~0.8.15",
-    "mech-png": "0.0.1"
+    "mech-png": "0.0.1",
+    "mega": "~0.2.0",
+    "random-seed": "~0.1.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",

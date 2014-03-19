@@ -26,9 +26,23 @@ function validPng(fileName) {
 
 angular.module('se10th20132App')
   .controller('MainCtrl', function ($scope, $http) {
+
+    $scope.algorithms = [{
+        name: 'GF4 Module',
+        key:  'F2'
+    }, {
+        name: 'GF4 Weak Module',
+        key: 'F2Weak'
+    }];
+
+    $scope.selections = {};
+
+    $scope.selections.embed_algorithm = 0;
+    $scope.selections.decode_algorithm = 0;
+
   	$scope.notpaletted = true;
     $scope.$watch('cover', function(file){
-        if (validImage(file.name)) {
+        if (validPng(file.name)) {
             $scope.notpaletted = false;
             var reader = new FileReader();
             reader.onload = function (loadEvent) {
@@ -41,14 +55,13 @@ angular.module('se10th20132App')
                     $scope.cover_width = imwidth;
                     $scope.cover_height = imheight;
                     $scope.cover_max_info_size = maxhide(imwidth, imheight, 5, 4);
-                    if (validPng($scope.cover_name)) {
+                    if (!validPng($scope.cover_name)) {
                         var canvas = document.createElement('canvas');
                         canvas.width = imwidth;
                         canvas.height = imheight;
                         var context = canvas.getContext('2d');
                         context.drawImage(img, 0, 0, imwidth, imheight);
                         $scope.coverDataURL = canvas.toDataURL();
-                        console.log($scope.coverDataURL);
                     }
                     $scope.$apply();
                 };
@@ -77,8 +90,8 @@ angular.module('se10th20132App')
     	}
     });
 
-    $scope.$watch('coverDataURL', embed);
-    $scope.$watch('infoDataURL', embed);
+    // $scope.$watch('coverDataURL', embed);
+    // $scope.$watch('infoDataURL', embed);
 
     $scope.embed_tasks = [];
     $scope.avg_psnr = 0;
@@ -93,22 +106,25 @@ angular.module('se10th20132App')
     	$scope.avg_psnr = result/count;
     	$scope.$apply();
     };
-    function embed(){
+    $scope.embed = function(){
     	if ($scope.infoDataURL && $scope.coverDataURL) {
     		var task = {
     			width: $scope.cover_width,
     			height: $scope.cover_height,
-    			size: $scope.info_size
+    			size: $scope.info_size,
+                algorithm: $scope.algorithms[$scope.selections.embed_algorithm].name,
+                org: $scope.coverDataURL
     		}
     		$scope.embed_tasks.push(task);
     		if (!$scope.notpaletted) {
 	    		if (task.size < $scope.cover_max_info_size) {
 		    		$http.post('/api/embed', {
-		    			algorithm: 'F2',
+		    			algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
 		    			cover: $scope.coverDataURL,
 		    			cover_name: $scope.cover_name,
 		    			info: $scope.infoDataURL,
-		    			info_name: $scope.info_name
+		    			info_name: $scope.info_name,
+                        password: $scope.s.cover_password
 			    	}).then(function(data){
 			    		task.link = data.data.data;
 			    		task.psnr = data.data.psnr;
@@ -141,10 +157,10 @@ angular.module('se10th20132App')
                 img.onload = function(){
                 	$scope.container_width = img.width;
                 	$scope.container_height = img.height;
+                    $scope.container_src = $scope.containerDataURL;
                 	$scope.$apply();
     			};
-    			$scope.container_src = $scope.containerDataURL;
-    			img.src = $scope.containerDataURL;
+                img.src = $scope.containerDataURL;
             }
             if (file) {
             	$scope.container_name = file.name;
@@ -153,27 +169,30 @@ angular.module('se10th20132App')
         }
     });
 
-    $scope.$watch('containerDataURL', decode);
+    //$scope.$watch('containerDataURL', decode);
     $scope.decode_tasks = [];
-    function decode(){
+    $scope.decode = function(){
     	if ($scope.containerDataURL) {
     		var task = {
     			width: $scope.container_width,
     			height: $scope.container_height,
-    			size: $scope.container_size
+    			size: $scope.container_size,
+                algorithm: $scope.algorithms[$scope.selections.decode_algorithm].name
     		}
     		$scope.decode_tasks.push(task);
+            console.log($scope.s.decode_password)
     		$http.post('/api/decode', {
-    			algorithm: 'F2',
+    			algorithm: $scope.algorithms[$scope.selections.decode_algorithm].key,
     			container: $scope.containerDataURL,
     			container_name: $scope.container_name,
+                password: $scope.s.decode_password
 	    	}).then(function(data){
 	    		task.link = data.data.data;
 	    		task.size = data.data.size;
 	    	}, function(data){
 	    		switch(data.data.message){
 	    			case 'WRONG_FILE':
-                        task.fail = 'Wrong file!';
+                        task.fail = 'Wrong file or password or algorithm!';
                         break;
 	    			case 'WRONG_FILE_TYPE':
                         task.fail = 'Wrong file type!';
