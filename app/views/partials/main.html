@@ -19,7 +19,7 @@
         <div class="drop" file="info">
           <div ng-show="notpaletted && !s.preview">Please choose a png on the right side box</div>
           <div ng-show="!notpaletted && !info_name && !s.preview">Drop or choose a file here</div>
-          <div ng-show="!notpaletted && cover_max_info_size && !s.preview">Max file size {{cover_max_info_size}} b</div>
+          <div ng-show="!notpaletted && cover_max_info_size && !s.preview">Max file size is {{cover_max_info_size_prefix}} {{cover_max_info_size}} b</div>
           <div ng-show="!notpaletted && info_name && !s.preview">{{info_name}}</div>
           <img ng-show="s.preview" src="{{s.preview_emb_src}}"></img>
         </div>
