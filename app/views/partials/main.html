@@ -2,7 +2,7 @@
   <div class="block">
     <div class="title">PNG STEGANOGRAPHY</div>
     <div class="description">
-      <p>This application allows embedding a file into a paletted png image, returning a png file, and extracting embedded files from it.</p>
+      <p>This application allows embedding a file into a png image, returning a png file with the same color type, and extracting embedded files from it.</p>
       <p>You can drop files into the boxes or click on the boxes to select files. By choosing an image file on the left box of the EMBED section, you will see the maximum capacity for embedding file on the box beside. Under the boxes are options including password and algorithm. Password is optional. When you are ready, push the button on the right hand side (Embed or Extract) to make the request.</p>
       <p>All requests will be displayed as a list of waiting processes. You may make more requests while waiting for results.</p>
     </div>
@@ -11,13 +11,13 @@
     <div class="title">EMBED</div>
     <div class="file">
         <div class="drop" file="cover">
-          <div ng-show="!cover_name && !s.preview">Drop or choose a paletted png file here</div>
+          <div ng-show="!cover_name && !s.preview">Drop or choose a png file here</div>
           <img ng-show="cover_name && !s.preview" src="{{cover_src}}" image="cover_img"></img>
           <img ng-show="s.preview" src="{{s.preview_org_src}}"></img>
         </div>
         <div class="seperator"></div>
         <div class="drop" file="info">
-          <div ng-show="notpaletted && !s.preview">Please choose a paletted png on the right side box</div>
+          <div ng-show="notpaletted && !s.preview">Please choose a png on the right side box</div>
           <div ng-show="!notpaletted && !info_name && !s.preview">Drop or choose a file here</div>
           <div ng-show="!notpaletted && cover_max_info_size && !s.preview">Max file size {{cover_max_info_size}} b</div>
           <div ng-show="!notpaletted && info_name && !s.preview">{{info_name}}</div>
