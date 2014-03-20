@@ -46,7 +46,7 @@
       </div>
       <div class="row" 
         ng-repeat="task in embed_tasks track by $index"
-        ng-mouseenter="s.preview = true; s.preview_emb_src = task.link; s.preview_org_src = task.org"
+        ng-mouseenter="s.preview = true; s.preview_emb_src = task.image_link; s.preview_org_src = task.org"
         ng-mouseleave="s.preview = false">
         <span class="col width">{{task.width}} px</span>
         <span class="col height">{{task.height}} px</span>

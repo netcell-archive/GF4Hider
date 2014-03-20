@@ -12,6 +12,6 @@ angular.module('se10th20132App', [
       .otherwise({
         redirectTo: '/'
       });
-    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel|data):/);
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel|data|blob):/);
     $locationProvider.html5Mode(true);
   });

@@ -24,6 +24,30 @@ function validPng(fileName) {
     return exp.test(fileName);  
 }
 
+function b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+}
+
 angular.module('se10th20132App')
   .controller('MainCtrl', function ($scope, $http) {
 
@@ -135,7 +159,8 @@ angular.module('se10th20132App')
 		    			info_name: $scope.info_name,
                         password: $scope.s.cover_password
 			    	}).then(function(data){
-			    		task.link = data.data.data;
+                        task.image_link = 'data:image/png;base64,' + data.data.data;
+			    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
 			    		task.psnr = data.data.psnr;
 			    		avg_psnr_fn();
 			    	}, function(data){
