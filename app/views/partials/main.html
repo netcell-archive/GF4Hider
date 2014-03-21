@@ -32,7 +32,7 @@
       <span class ="selection" 
         ng-class  ="{selected: $index === selections.embed_algorithm}" 
         ng-repeat ="algorithm in algorithms track by $index" 
-        ng-click  ="selections.embed_algorithm = $index">{{algorithm.name}}</span>
+        ng-click  ="selections.embed_algorithm = $index; updateCoverMaxInfoSize()">{{algorithm.name}}</span>
       <span class="button" ng-click="embed()">Embed</span>
     </div>
     <div class="result" ng-if="embed_tasks.length">
@@ -41,7 +41,8 @@
         <span class="col height">height</span>
         <span class="col size">size</span>
         <span class="col algorithm">algorithm</span>
-        <span class="col link">link</span>
+        <span class="col link">download</span>
+        <span class="col link"></span>
         <span class="col psnr">psnr</span>
       </div>
       <div class="row" 
@@ -53,9 +54,13 @@
         <span class="col size">{{task.size}} b</span>
         <span class="col algorithm">{{task.algorithm}}</span>
         <span class="col link">
-          <a href={{task.link}} ng-show="task.link" target="_blank">download</a>
+          <a href={{task.link}} ng-show="task.link">png</a>
           <span class="fail" ng-show="task.fail">{{task.fail}}</span>
           <span class="fail" ng-show="!task.fail && !task.link">Processing...</span>
+        </span>
+        <span class="col link">
+          <a href={{task.bmpLink}} ng-show="task.bmpLink">bmp</a>
+          <span ng-show="task.link && !task.bmpLink">Processing...</span>
         </span>
         <span class="col psnr">{{task.psnr.toFixed(1)}}</span>
       </div>
@@ -64,6 +69,7 @@
         <span class="col height"></span>
         <span class="col size"></span>
         <span class="col algorithm"></span>
+        <span class="col link"></span>
         <span class="col link">average</span>
         <span class="col psnr">{{avg_psnr.toFixed(1)}}</span>
       </div>

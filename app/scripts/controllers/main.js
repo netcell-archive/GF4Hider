@@ -14,8 +14,13 @@ function maxhide(width, height, blockLength, infoBlockLength){
     return max_infoLength_inBytes - binaryLength_max_infoLength_inBytes;
 }
 
+// function validImage(fileName) {
+//     var exp = /^.*\.(jpg|jpeg|gif|JPG|png|PNG)$/;         
+//     return exp.test(fileName);  
+// }
+
 function validImage(fileName) {
-    var exp = /^.*\.(jpg|jpeg|gif|JPG|png|PNG)$/;         
+    var exp = /^.*\.(jpg|jpeg|gif|bmp|BMP|png|PNG)$/;
     return exp.test(fileName);  
 }
 
@@ -53,20 +58,25 @@ angular.module('se10th20132App')
 
     $scope.algorithms = [{
         name: 'GF4 Module',
-        key:  'F2'
+        key:  'F2',
+        blockLength: 5,
+        infoBlockLength: 4
     }, {
         name: 'GF4 Weak Module',
-        key: 'F2Weak'
+        key: 'F2Weak',
+        blockLength: 4,
+        infoBlockLength: 4
     }];
 
     $scope.selections = {};
 
     $scope.selections.embed_algorithm = 0;
     $scope.selections.decode_algorithm = 0;
+    $scope.updateCoverMaxInfoSize = function(){};
 
   	$scope.notpaletted = true;
     $scope.$watch('cover', function(file){
-        if (validPng(file.name)) {
+        if (validImage(file.name)) {
             $scope.notpaletted = false;
             var reader = new FileReader();
             reader.onload = function (loadEvent) {
@@ -79,23 +89,26 @@ angular.module('se10th20132App')
                     $scope.cover_width = imwidth;
                     $scope.cover_height = imheight;
                     $scope.cover_max_info_size_prefix = 'at least ';
-                    $scope.cover_max_info_size = maxhide(imwidth, imheight, 5, 4);
-                    $http.post('/api/maxInfoSize', {
-                        algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
-                        cover: $scope.coverDataURL,
-                    }).then(function(data){
-                        $scope.cover_max_info_size_prefix = '';
-                        $scope.cover_max_info_size = data.data.availableSpace_ForEmbedding;
-                        $scope.$apply();
-                    });
-                    // if (!validPng($scope.cover_name)) {
-                    //     var canvas = document.createElement('canvas');
-                    //     canvas.width = imwidth;
-                    //     canvas.height = imheight;
-                    //     var context = canvas.getContext('2d');
-                    //     context.drawImage(img, 0, 0, imwidth, imheight);
-                    //     $scope.coverDataURL = canvas.toDataURL();
-                    // }
+                    if (!validPng($scope.cover_name)) {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = imwidth;
+                        canvas.height = imheight;
+                        var context = canvas.getContext('2d');
+                        context.drawImage(img, 0, 0, imwidth, imheight);
+                        $scope.coverDataURL = canvas.toDataURL();
+                    }
+                    $scope.updateCoverMaxInfoSize = function(){
+                        $scope.cover_max_info_size = maxhide(imwidth, imheight, $scope.algorithms[$scope.selections.embed_algorithm].blockLength, $scope.algorithms[$scope.selections.embed_algorithm].infoBlockLength);
+                        $http.post('/api/maxInfoSize', {
+                            algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
+                            cover: $scope.coverDataURL,
+                        }).then(function(data){
+                            $scope.cover_max_info_size_prefix = '';
+                            $scope.cover_max_info_size = data.data.availableSpace_ForEmbedding;
+                            $scope.$apply();
+                        });
+                    };
+                    $scope.updateCoverMaxInfoSize();
                     $scope.$apply();
                 };
                 $scope.cover_src = $scope.coverDataURL;
@@ -161,6 +174,17 @@ angular.module('se10th20132App')
 			    	}).then(function(data){
                         task.image_link = 'data:image/png;base64,' + data.data.data;
 			    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
+                        var img = new Image;
+                        img.onload = function(){
+                            var canvas = document.createElement('canvas');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            var context = canvas.getContext('2d');
+                            context.drawImage(img, 0, 0, img.width, img.height);
+                            task.bmpLink = URL.createObjectURL(b64toBlob(Canvas2Image.createBMP(canvas), 'image/bmp'));
+                            $scope.$apply();
+                        }
+                        img.src = task.image_link;
 			    		task.psnr = data.data.psnr;
 			    		avg_psnr_fn();
 			    	}, function(data){
