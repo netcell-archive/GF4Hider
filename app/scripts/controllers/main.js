@@ -295,15 +295,18 @@ angular.module('se10th20132App')
 			    	}).then(function(data){
                         task.image_link = 'data:image/png;base64,' + data.data.data;
 			    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
-                        var img = new Image;
-                        img.onload = function(){
-                            var canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            var context = canvas.getContext('2d');
-                            context.drawImage(img, 0, 0, img.width, img.height);
-                            task.bmpLink = URL.createObjectURL(b64toBlob(buildBMP(canvas), 'image/bmp'));
-                            $scope.$apply();
+                        task.paletted = data.data.paletted;
+                        if (!task.paletted) {
+                            var img = new Image;
+                            img.onload = function(){
+                                var canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                var context = canvas.getContext('2d');
+                                context.drawImage(img, 0, 0, img.width, img.height);
+                                task.bmpLink = URL.createObjectURL(b64toBlob(buildBMP(canvas), 'image/bmp'));
+                                $scope.$apply();
+                            }
                         }
                         img.src = task.image_link;
 			    		task.psnr = data.data.psnr;
@@ -328,7 +331,7 @@ angular.module('se10th20132App')
     	}
     }
     $scope.$watch('container', function(file){
-        if (validPng(file.name)){
+        if (validImage(file.name)){
         	var reader = new FileReader();
             reader.onload = function (loadEvent) {
                 $scope.containerDataURL = loadEvent.target.result;
@@ -336,6 +339,14 @@ angular.module('se10th20132App')
                 img.onload = function(){
                 	$scope.container_width = img.width;
                 	$scope.container_height = img.height;
+                    if (!validPng($scope.container_name)) {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        var context = canvas.getContext('2d');
+                        context.drawImage(img, 0, 0, img.width, img.height);
+                        $scope.containerDataURL = canvas.toDataURL();
+                    }
                     $scope.container_src = $scope.containerDataURL;
                 	$scope.$apply();
     			};

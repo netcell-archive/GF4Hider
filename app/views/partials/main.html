@@ -2,7 +2,7 @@
   <div class="block">
     <div class="title">PNG STEGANOGRAPHY</div>
     <div class="description">
-      <p>This application allows embedding a file into a png image, returning a png file with the same color type, and extracting embedded files from it.</p>
+      <p>This application allows embedding a file into a png or bmp image, returning a pair of png and bmp files, and extracting embedded files from them. Notice that, you will not receive bmp result if the input is a paletted png.</p>
       <p>You can drop files into the boxes or click on the boxes to select files. By choosing an image file on the left box of the EMBED section, you will see the maximum capacity for embedding file on the box beside. Under the boxes are options including password and algorithm. Password is optional. When you are ready, push the button on the right hand side (Embed or Extract) to make the request.</p>
       <p>All requests will be displayed as a list of waiting processes. You may make more requests while waiting for results.</p>
     </div>
@@ -67,7 +67,8 @@
         </span>
         <span class="col link">
           <a href={{task.bmpLink}} ng-show="task.bmpLink">bmp</a>
-          <span ng-show="task.link && !task.bmpLink">Processing...</span>
+          <span ng-show="task.link && !task.bmpLink && !task.paletted">Processing...</span>
+          <span ng-show="task.link && !task.bmpLink && task.paletted">Paletted!</span>
         </span>
         <span class="col psnr">{{task.psnr.toFixed(1)}}</span>
       </div>
