@@ -73,6 +73,12 @@ body {
         display: table;
         table-layout: fixed;
         margin: 0 auto 20px auto;
+        &.preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #fafafa;
+        }
         .drop {
             box-sizing: border-box;
             cursor: pointer;

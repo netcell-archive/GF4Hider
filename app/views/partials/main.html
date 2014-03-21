@@ -9,19 +9,26 @@
   </div>
   <div class="block">
     <div class="title">EMBED</div>
-    <div class="file">
+    <div class="file preview" ng-show="s.preview">
         <div class="drop" file="cover">
-          <div ng-show="!cover_name && !s.preview">Drop or choose a png file here</div>
-          <img ng-show="cover_name && !s.preview" src="{{cover_src}}" image="cover_img"></img>
-          <img ng-show="s.preview" src="{{s.preview_org_src}}"></img>
+          <img src="{{s.preview_org_src}}"></img>
         </div>
         <div class="seperator"></div>
         <div class="drop" file="info">
-          <div ng-show="notpaletted && !s.preview">Please choose a png on the right side box</div>
-          <div ng-show="!notpaletted && !info_name && !s.preview">Drop or choose a file here</div>
-          <div ng-show="!notpaletted && cover_max_info_size && !s.preview">Max file size is {{cover_max_info_size_prefix}} {{cover_max_info_size}} b</div>
-          <div ng-show="!notpaletted && info_name && !s.preview">{{info_name}}</div>
-          <img ng-show="s.preview" src="{{s.preview_emb_src}}"></img>
+          <img src="{{s.preview_emb_src}}"></img>
+        </div>
+    </div>
+    <div class="file">
+        <div class="drop" file="cover">
+          <div ng-show="!cover_name">Drop or choose a png file here</div>
+          <img ng-show="cover_name" src="{{cover_src}}" image="cover_img"></img>
+        </div>
+        <div class="seperator"></div>
+        <div class="drop" file="info">
+          <div ng-show="notpaletted">Please choose a png on the right side box</div>
+          <div ng-show="!notpaletted && !info_name">Drop or choose a file here</div>
+          <div ng-show="!notpaletted && cover_max_info_size">Max file size is {{cover_max_info_size_prefix}} {{cover_max_info_size}} b</div>
+          <div ng-show="!notpaletted && info_name">{{info_name}}</div>
         </div>
     </div>
     <div class="password">
