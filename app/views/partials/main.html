@@ -9,15 +9,6 @@
   </div>
   <div class="block">
     <div class="title">EMBED</div>
-    <div class="file preview" ng-show="s.preview">
-        <div class="drop" file="cover">
-          <img src="{{s.preview_org_src}}"></img>
-        </div>
-        <div class="seperator"></div>
-        <div class="drop" file="info">
-          <img src="{{s.preview_emb_src}}"></img>
-        </div>
-    </div>
     <div class="file">
         <div class="drop" file="cover">
           <div ng-show="!cover_name">Drop or choose a png file here</div>
@@ -81,6 +72,15 @@
         <span class="col link">average</span>
         <span class="col psnr">{{avg_psnr.toFixed(1)}}</span>
       </div>
+    </div>
+    <div class="file preview" ng-class="{'preview-show': s.preview}">
+        <div class="drop" file="cover">
+          <img src="{{s.preview_org_src}}"></img>
+        </div>
+        <div class="seperator"></div>
+        <div class="drop" file="info">
+          <img src="{{s.preview_emb_src}}"></img>
+        </div>
     </div>
   </div>
 

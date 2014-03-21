@@ -73,11 +73,23 @@ body {
         display: table;
         table-layout: fixed;
         margin: 0 auto 20px auto;
+        transition: all 0.2s ease-in-out;
         &.preview {
+            box-shadow: 0px 0px 60px 0px #353535;
+            width: 864px;
             position: fixed;
+            top: -302px;
+            left: 50%;
+            margin-left: -432px;
+            background-color: #444750;
+            border-bottom: #696969 10px solid;
+            z-index: 1;
+            &>.drop {
+                border: none;
+            }
+        }
+        &.preview-show {
             top: 0;
-            left: 0;
-            background-color: #fafafa;
         }
         .drop {
             box-sizing: border-box;
