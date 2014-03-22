@@ -296,20 +296,18 @@ angular.module('se10th20132App')
                         task.image_link = 'data:image/png;base64,' + data.data.data;
 			    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
                         task.paletted = data.data.paletted;
-                        if (!task.paletted) {
-                            var img = new Image;
-                            img.onload = function(){
-                                var canvas = document.createElement('canvas');
-                                canvas.width = img.width;
-                                canvas.height = img.height;
-                                var context = canvas.getContext('2d');
-                                context.drawImage(img, 0, 0, img.width, img.height);
-                                task.bmpLink = URL.createObjectURL(b64toBlob(buildBMP(canvas), 'image/bmp'));
-                                $scope.$apply();
-                            }
+                        var img = new Image;
+                        img.onload = function(){
+                            var canvas = document.createElement('canvas');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            var context = canvas.getContext('2d');
+                            context.drawImage(img, 0, 0, img.width, img.height);
+                            task.bmpLink = URL.createObjectURL(b64toBlob(buildBMP(canvas), 'image/bmp'));
+                            $scope.$apply();
                         }
+                        task.psnr = data.data.psnr;
                         img.src = task.image_link;
-			    		task.psnr = data.data.psnr;
 			    		avg_psnr_fn();
 			    	}, function(data){
 			    		switch(data.data.message){
