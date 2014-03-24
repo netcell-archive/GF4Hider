@@ -3,7 +3,7 @@
     <div class="title">PNG STEGANOGRAPHY</div>
     <div class="description">
       <p>This application allows embedding a file into a png or bmp image, returning a pair of png and bmp files, and extracting embedded files from them. Notice that, the bmp file received when the input is a paletted png cannot be used to extract information, since the palette has been omitted.</p>
-      <p>You can drop files into the boxes or click on the boxes to select files. By choosing an image file on the left box of the EMBED section, you will see the maximum capacity for embedding file on the box beside. Under the boxes are options including password and algorithm. Password is optional. When you are ready, push the button on the right hand side (Embed or Extract) to make the request.</p>
+      <p>You can drop files into the boxes or click on the boxes to select files. By choosing an image file on the left box of the EMBED section, you will see the maximum capacity for embedding file on the box beside. Under the boxes are options including password and algorithm. Password is optional. The request will be made automatically when all required files are selected. If you want to request with a new password, push the button on the right hand side (Embed or Extract) to make a new request.</p>
       <p>All requests will be displayed as a list of waiting processes. You may make more requests while waiting for results.</p>
     </div>
   </div>
@@ -16,10 +16,10 @@
         </div>
         <div class="seperator"></div>
         <div class="drop" file="info">
-          <div ng-show="notpaletted">Please choose a png on the right side box</div>
-          <div ng-show="!notpaletted && !info_name">Drop or choose a file here</div>
-          <div ng-show="!notpaletted && cover_max_info_size">Max file size is {{cover_max_info_size_prefix}} {{cover_max_info_size}} b</div>
-          <div ng-show="!notpaletted && info_name">{{info_name}}</div>
+          <!-- <div ng-show="notpaletted">Please choose a png on the right side box</div> -->
+          <div ng-show="!info_name">Drop or choose a file here</div>
+          <div ng-show="cover_max_info_size">Max file size is {{cover_max_info_size_prefix}} {{cover_max_info_size}} b</div>
+          <div ng-show="info_name">{{info_name}}</div>
         </div>
     </div>
     <div class="password">
@@ -45,8 +45,7 @@
       </div>
       <div class="row" 
         ng-repeat="task in embed_tasks track by $index"
-        ng-mouseenter="s.preview = true; s.preview_emb_src = task.image_link; s.preview_org_src = task.org"
-        ng-mouseleave="s.preview = false">
+        ng-click="s.preview = true; s.preview_emb_src = task.image_link; s.preview_org_src = task.org">
         <span class="col width">{{task.width}} px</span>
         <span class="col height">{{task.height}} px</span>
         <span class="col size">{{task.size}} b</span>
@@ -73,13 +72,22 @@
         <span class="col psnr">{{avg_psnr.toFixed(1)}}</span>
       </div>
     </div>
-    <div class="file preview" ng-class="{'preview-show': s.preview}">
-        <div class="drop" file="cover">
-          <img src="{{s.preview_org_src}}"></img>
+    <div class="file preview" ng-class="{'preview-show': s.preview}" ng-click="s.preview = !s.preview">
+        <div class="drop">
+          <img id='org-preview' src="{{s.preview_org_src}}"></img>
         </div>
         <div class="seperator"></div>
-        <div class="drop" file="info">
-          <img src="{{s.preview_emb_src}}"></img>
+        <div class="drop">
+          <img id='res-preview' src="{{s.preview_emb_src}}"></img>
+        </div>
+    </div>
+    <div class="file analyze" ng-class="{'analyze-show': s.preview}" ng-click = "s.preview = !s.preview">
+        <div class="drop">
+          <canvas id="org-analyze"></canvas>
+        </div>
+        <div class="seperator"></div>
+        <div class="drop">
+          <canvas id="res-analyze"></canvas>
         </div>
     </div>
   </div>

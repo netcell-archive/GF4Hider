@@ -177,6 +177,41 @@ function b64toBlob(b64Data, contentType, sliceSize) {
 angular.module('se10th20132App')
   .controller('MainCtrl', function ($scope, $http) {
 
+        function visualAttack(canvas, canvasimg, canvasctx){
+            canvas.width = canvasimg.width;
+            canvas.height = canvasimg.height;
+            canvasctx.drawImage(canvasimg, 0, 0, canvasimg.width, canvasimg.height);
+            var imageData = canvasctx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imageData.data;
+            var color = [
+                0,
+                85,
+                170,
+                255
+            ];
+            for (var i = 0; i < data.length; i+=4) {
+                data[i]   = color[((data[i] >>> 2) << 2) ^ data[i]];
+                data[i+1] = color[((data[i+1] >>> 2) << 2) ^ data[i+1]];
+                data[i+2] = color[((data[i+2] >>> 2) << 2) ^ data[i+2]];
+            };
+            canvasctx.putImageData(imageData, 0, 0);
+        }
+
+        var org = $('#org-analyze')[0],
+            orgctx = org.getContext('2d'),
+            res = $('#res-analyze')[0],
+            resctx = res.getContext('2d'),
+            orgimg = $('#org-preview')[0],
+            resimg = $('#res-preview')[0];
+
+        orgimg.onload = function(){
+            visualAttack(org, orgimg, orgctx);
+        };
+
+        resimg.onload = function(){
+            visualAttack(res, resimg, resctx);
+        };
+
     $scope.algorithms = [{
         name: 'GF4 Module',
         key:  'F2',
@@ -231,6 +266,7 @@ angular.module('se10th20132App')
                     };
                     $scope.updateCoverMaxInfoSize();
                     $scope.$apply();
+                    $scope.embed();
                 };
                 $scope.cover_src = $scope.coverDataURL;
                 img.src = $scope.coverDataURL;
@@ -243,22 +279,18 @@ angular.module('se10th20132App')
     });
 
     $scope.$watch('info', function(file){
-    	if (!$scope.notpaletted){
 	    	var reader = new FileReader();
 	        reader.onload = function (loadEvent) {
 	            $scope.infoDataURL = loadEvent.target.result;
 	            $scope.$apply();
+                $scope.embed();
 	        }
 	        if (file) {
 	        	$scope.info_name = file.name;
 	        	$scope.info_size = file.size;
 	        	reader.readAsDataURL(file);
 	        }
-    	}
     });
-
-    // $scope.$watch('coverDataURL', embed);
-    // $scope.$watch('infoDataURL', embed);
 
     $scope.embed_tasks = [];
     $scope.avg_psnr = 0;
@@ -274,6 +306,8 @@ angular.module('se10th20132App')
     	$scope.$apply();
     };
     $scope.embed = function(){
+        console.log($scope.infoDataURL);
+        console.log($scope.coverDataURL);
     	if ($scope.infoDataURL && $scope.coverDataURL) {
     		var task = {
     			width: $scope.cover_width,
@@ -283,49 +317,49 @@ angular.module('se10th20132App')
                 org: $scope.coverDataURL
     		}
     		$scope.embed_tasks.push(task);
-    		if (!$scope.notpaletted) {
-	    		if (task.size < $scope.cover_max_info_size) {
-		    		$http.post('/api/embed', {
-		    			algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
-		    			cover: $scope.coverDataURL,
-		    			cover_name: $scope.cover_name,
-		    			info: $scope.infoDataURL,
-		    			info_name: $scope.info_name,
-                        password: $scope.s.cover_password
-			    	}).then(function(data){
-                        task.image_link = 'data:image/png;base64,' + data.data.data;
-			    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
-                        task.paletted = data.data.paletted;
-                        var img = new Image;
-                        img.onload = function(){
-                            var canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            var context = canvas.getContext('2d');
-                            context.drawImage(img, 0, 0, img.width, img.height);
-                            task.bmpLink = URL.createObjectURL(b64toBlob(buildBMP(canvas), 'image/bmp'));
-                            $scope.$apply();
-                        }
-                        task.psnr = data.data.psnr;
-                        img.src = task.image_link;
-			    		avg_psnr_fn();
-			    	}, function(data){
-			    		switch(data.data.message){
-			    			case 'WRONG_FILE_TYPE':
-			    			case 'NOT_PALETTED':
-			    				task.fail = 'Image is not paletted png!';
-			    				$scope.notpaletted = true;
-			    				break;
-			    			case 'INFO_TOO_LONG':
-			    				task.fail = 'File is too big!';
-			    				break;
-			    			default:
-			    				task.fail = 'Unknown error!';
-			    				break;
-			    		}
-			    	});
-			    } else task.fail = 'File too big!';
-			} else task.fail = 'Image is not paletted png!';
+    		if (task.size < $scope.cover_max_info_size) {
+	    		$http.post('/api/embed', {
+	    			algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
+	    			cover: $scope.coverDataURL,
+	    			cover_name: $scope.cover_name,
+	    			info: $scope.infoDataURL,
+	    			info_name: $scope.info_name,
+                    password: $scope.s.cover_password
+		    	}).then(function(data){
+                    task.image_link = 'data:image/png;base64,' + data.data.data;
+		    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
+                    task.paletted = data.data.paletted;
+                    var img = new Image;
+                    img.onload = function(){
+                        var canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        var context = canvas.getContext('2d');
+                        context.drawImage(img, 0, 0, img.width, img.height);
+                        task.bmpLink = URL.createObjectURL(b64toBlob(buildBMP(canvas), 'image/bmp'));
+                        $scope.$apply();
+                    }
+                    task.psnr = data.data.psnr;
+                    img.src = task.image_link;
+		    		avg_psnr_fn();
+		    	}, function(data){
+		    		switch(data.data.message){
+		    			case 'WRONG_FILE_TYPE':
+		    			case 'NOT_PALETTED':
+		    				task.fail = 'Image is not paletted png!';
+		    				$scope.notpaletted = true;
+		    				break;
+		    			case 'INFO_TOO_LONG':
+		    				task.fail = 'File is too big!';
+		    				break;
+		    			default:
+		    				task.fail = 'Unknown error!';
+		    				break;
+		    		}
+                    $scope.$apply();
+		    	});
+		    } else task.fail = 'File too big!';
+            $scope.$apply();
     	}
     }
     $scope.$watch('container', function(file){
@@ -347,6 +381,7 @@ angular.module('se10th20132App')
                     }
                     $scope.container_src = $scope.containerDataURL;
                 	$scope.$apply();
+                    $scope.decode();
     			};
                 img.src = $scope.containerDataURL;
             }
@@ -357,7 +392,8 @@ angular.module('se10th20132App')
         }
     });
 
-    //$scope.$watch('containerDataURL', decode);
+    $scope.$watch('containerDataURL', $scope.decode);
+
     $scope.decode_tasks = [];
     $scope.decode = function(){
     	if ($scope.containerDataURL) {
