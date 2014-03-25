@@ -132,7 +132,7 @@ function maxhide(width, height, blockLength, infoBlockLength){
 
         binaryLength_max_infoLength_inBytes = numberOfBlocks_max_infoLength_inBytes * infoBlockLength;
     
-    return max_infoLength_inBytes - binaryLength_max_infoLength_inBytes;
+    return max_infoLength_inBytes - binaryLength_max_infoLength_inBytes - 4;
 }
 
 // function validImage(fileName) {
