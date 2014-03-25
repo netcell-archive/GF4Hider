@@ -130,4 +130,26 @@
       </div>
     </div>
   </div>
+  <div class="block">
+    <div class="title">Random File</div>
+    <div class="password">
+      <span>Size: </span>
+      <input type="text" ng-model="s.random_size"/>
+      <span class="button" ng-click="generate()">Generate</span>
+    </div>
+    <div class="result" ng-if="random_tasks.length">
+      <div class="title row">
+        <span class="col width">size</span>
+        <span class="col link">link</span>
+      </div>
+      <div class="row" ng-class="{fail: task.fail}" ng-repeat="task in random_tasks track by $index">
+        <span class="col width">{{task.size}} b</span>
+        <span class="col link">
+          <a href={{task.link}} ng-show="task.link" target="_blank">download</a>
+          <span class="fail" ng-show="task.fail">{{task.fail}}</span>
+          <span class="fail" ng-show="!task.fail && !task.link">Processing...</span>
+        </span>
+      </div>
+    </div>
+  </div>
 </div>

@@ -432,4 +432,25 @@ angular.module('se10th20132App')
 	    	});
     	}
     }
+    $scope.random_tasks = []
+    $scope.generate = function(){
+        if (!isNaN($scope.s.random_size)) {
+            var task = {
+                size: $scope.s.random_size
+            }
+            if (task.size < 5 * 1024 && task.size > 0) {
+                $scope.random_tasks.push(task);
+                $http.post('/api/randomFile', {
+                    kb: task.size,
+                }).then(function(data){
+                    task.link = URL.createObjectURL(b64toBlob(data.data.file));
+                    $scope.$apply();
+                }, function(data){
+                    task.fail = 'FAILED';
+                    $scope.$apply();
+                });
+            } else task.fail = 'FAILED';
+        }
+        $scope.$apply();
+    }
   });

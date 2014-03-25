@@ -176,6 +176,14 @@ body {
             font-style: italic;
             color: #555;
         }
+        .button {
+            box-sizing: border-box;
+            display: table-cell;
+            margin: 5px;
+            border-radius: 7px;
+            background-color: #444750;
+            color: #fafafa;
+        }
     }
     .selections {
         width: 100%;
