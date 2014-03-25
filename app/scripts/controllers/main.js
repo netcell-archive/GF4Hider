@@ -412,7 +412,7 @@ angular.module('se10th20132App')
     			container_name: $scope.container_name,
                 password: $scope.s.decode_password
 	    	}).then(function(data){
-	    		task.link = data.data.data;
+	    		task.link = URL.createObjectURL(b64toBlob(data.data.data));
 	    		task.size = data.data.size;
 	    	}, function(data){
 	    		switch(data.data.message){
