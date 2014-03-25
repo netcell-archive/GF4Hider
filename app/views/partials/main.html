@@ -122,7 +122,7 @@
         <span class="col width">{{task.width}} px</span>
         <span class="col height">{{task.height}} px</span>
         <span class="col link">
-          <a href={{task.link}} ng-show="task.link" target="_blank" download="data">download</a>
+          <a href={{task.link}} ng-show="task.link" target="_blank" download="data{{task.ext}}">download</a>
           <span class="fail" ng-show="task.fail">{{task.fail}}</span>
           <span class="fail" ng-show="!task.fail && !task.link">Processing...</span>
         </span>

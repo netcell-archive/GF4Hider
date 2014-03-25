@@ -414,6 +414,7 @@ angular.module('se10th20132App')
 	    	}).then(function(data){
 	    		task.link = URL.createObjectURL(b64toBlob(data.data.data));
 	    		task.size = data.data.size;
+                task.ext = data.data.ext;
 	    	}, function(data){
 	    		switch(data.data.message){
 	    			case 'WRONG_FILE':
