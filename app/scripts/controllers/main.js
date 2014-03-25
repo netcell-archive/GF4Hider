@@ -197,20 +197,20 @@ angular.module('se10th20132App')
             canvasctx.putImageData(imageData, 0, 0);
         }
 
-        var org = $('#org-analyze')[0],
-            orgctx = org.getContext('2d'),
-            res = $('#res-analyze')[0],
-            resctx = res.getContext('2d'),
-            orgimg = $('#org-preview')[0],
-            resimg = $('#res-preview')[0];
+        // var org = $('#org-analyze')[0],
+        //     orgctx = org.getContext('2d'),
+        //     res = $('#res-analyze')[0],
+        //     resctx = res.getContext('2d'),
+        //     orgimg = $('#org-preview')[0],
+        //     resimg = $('#res-preview')[0];
 
-        orgimg.onload = function(){
-            visualAttack(org, orgimg, orgctx);
-        };
+        // orgimg.onload = function(){
+        //     visualAttack(org, orgimg, orgctx);
+        // };
 
-        resimg.onload = function(){
-            visualAttack(res, resimg, resctx);
-        };
+        // resimg.onload = function(){
+        //     visualAttack(res, resimg, resctx);
+        // };
 
     $scope.algorithms = [{
         name: 'GF4 Module',
@@ -314,7 +314,8 @@ angular.module('se10th20132App')
     			height: $scope.cover_height,
     			size: $scope.info_size,
                 algorithm: $scope.algorithms[$scope.selections.embed_algorithm].name,
-                org: $scope.coverDataURL
+                org: $scope.coverDataURL,
+                name: $scope.cover_name.substring(0, $scope.cover_name.length-4) + '.'
     		}
     		$scope.embed_tasks.push(task);
     		if (task.size < $scope.cover_max_info_size) {
@@ -434,7 +435,7 @@ angular.module('se10th20132App')
     }
     $scope.random_tasks = []
     $scope.generate = function(){
-        if (!isNaN($scope.s.random_size)) {
+        if (!isNaN(parseFloat($scope.s.random_size)) && isFinite($scope.s.random_size)) {
             var task = {
                 size: $scope.s.random_size
             }

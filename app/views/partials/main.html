@@ -51,12 +51,12 @@
         <span class="col size">{{task.size}} b</span>
         <span class="col algorithm">{{task.algorithm}}</span>
         <span class="col link">
-          <a href={{task.link}} ng-show="task.link">png</a>
+          <a href={{task.link}} ng-show="task.link" download="{{task.name+'png'}}">png</a>
           <span class="fail" ng-show="task.fail">{{task.fail}}</span>
           <span class="fail" ng-show="!task.fail && !task.link">Processing...</span>
         </span>
         <span class="col link">
-          <a href={{task.bmpLink}} ng-show="task.bmpLink">bmp</a>
+          <a href={{task.bmpLink}} ng-show="task.bmpLink"  download="{{task.name+'bmp'}}">bmp</a>
           <span ng-show="task.link && !task.bmpLink && !task.paletted">Processing...</span>
           <span ng-show="task.link && !task.bmpLink && task.paletted">Paletted!</span>
         </span>
@@ -81,7 +81,7 @@
           <img id='res-preview' src="{{s.preview_emb_src}}"></img>
         </div>
     </div>
-    <div class="file analyze" ng-class="{'analyze-show': s.preview}" ng-click = "s.preview = !s.preview">
+    <!-- <div class="file analyze" ng-class="{'analyze-show': s.preview}" ng-click = "s.preview = !s.preview">
         <div class="drop">
           <canvas id="org-analyze"></canvas>
         </div>
@@ -89,7 +89,7 @@
         <div class="drop">
           <canvas id="res-analyze"></canvas>
         </div>
-    </div>
+    </div> -->
   </div>
 
   <div class="block">
