@@ -315,7 +315,7 @@ angular.module('se10th20132App')
     			size: $scope.info_size,
                 algorithm: $scope.algorithms[$scope.selections.embed_algorithm].name,
                 org: $scope.coverDataURL,
-                name: $scope.cover_name.substring(0, $scope.cover_name.length-4) + '.'
+                name: $scope.cover_name.substring(0, $scope.cover_name.length-4) + '_ste.'
     		}
     		$scope.embed_tasks.push(task);
     		if (task.size < $scope.cover_max_info_size) {
