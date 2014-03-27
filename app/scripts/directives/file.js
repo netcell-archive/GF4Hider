@@ -19,7 +19,10 @@ angular.module('se10th20132App')
             document.body.appendChild(hiddenFileInput);
             hiddenFileInput.addEventListener("change", function(e) {
                 var files = hiddenFileInput.files;
-                var file = files[0];
+                var file  = [];
+                for (var i = 0; i < files.length; i++) {
+                    file.push(files[i]);
+                };
                 scope.file = file;
                 scope.$apply();
             });
@@ -49,7 +52,10 @@ angular.module('se10th20132App')
                 el.removeClass('hover');
                 e.preventDefault();
                 var files = e.originalEvent.dataTransfer.files;
-                var file = files[0];
+                var file  = [];
+                for (var i = 0; i < files.length; i++) {
+                    file.push(files[i]);
+                };
                 scope.file = file;
                 scope.$apply();
             });

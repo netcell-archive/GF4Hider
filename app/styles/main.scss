@@ -153,7 +153,8 @@ body {
         table-layout: fixed;
         border-collapse: collapse;
         span {
-            width: 80px;
+            width: 100px;
+            text-align: center;
             line-height: 30px;
             font-size: 14px;
             font-family: arial;
@@ -183,6 +184,15 @@ body {
             border-radius: 7px;
             background-color: #444750;
             color: #fafafa;
+        }
+        .selection {
+            display: table-cell;
+            margin: 5px;
+            border-radius: 15px;
+            &.selected {
+                background: #444750;
+                color: #fafafa;
+            }
         }
     }
     .selections {

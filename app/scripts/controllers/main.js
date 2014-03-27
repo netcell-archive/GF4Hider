@@ -231,8 +231,12 @@ angular.module('se10th20132App')
     $scope.updateCoverMaxInfoSize = function(){};
 
   	$scope.notpaletted = true;
-    $scope.$watch('cover', function(file){
-        if (validImage(file.name)) {
+    $scope.$watch('cover', coverHandler);
+
+    function coverHandler(files){
+        var file;
+        if (files.length) file = files.shift();
+        if (file && validImage(file.name)) {
             $scope.notpaletted = false;
             var reader = new FileReader();
             reader.onload = function (loadEvent) {
@@ -266,31 +270,37 @@ angular.module('se10th20132App')
                     };
                     $scope.updateCoverMaxInfoSize();
                     $scope.$apply();
-                    $scope.embed();
+                    $scope.embed(function(){
+                        coverHandler(files);
+                    });
                 };
                 $scope.cover_src = $scope.coverDataURL;
                 img.src = $scope.coverDataURL;
             }
-            if (file) {
-                $scope.cover_name = file.name;
-                reader.readAsDataURL(file);
-            }
+            $scope.cover_name = file.name;
+            reader.readAsDataURL(file);
         }
-    });
+    };
 
-    $scope.$watch('info', function(file){
+    $scope.$watch('info', infoHandler);
+
+    function infoHandler(files){
+        var file;
+        if (files.length) file = files.shift();
+        if (file) {
 	    	var reader = new FileReader();
 	        reader.onload = function (loadEvent) {
 	            $scope.infoDataURL = loadEvent.target.result;
 	            $scope.$apply();
-                $scope.embed();
+                $scope.embed(function(){
+                    infoHandler(files);
+                });
 	        }
-	        if (file) {
-	        	$scope.info_name = file.name;
-	        	$scope.info_size = file.size;
-	        	reader.readAsDataURL(file);
-	        }
-    });
+        	$scope.info_name = file.name;
+        	$scope.info_size = file.size;
+        	reader.readAsDataURL(file);
+        }
+    };
 
     $scope.embed_tasks = [];
     $scope.avg_psnr = 0;
@@ -305,19 +315,33 @@ angular.module('se10th20132App')
     	$scope.avg_psnr = result/count;
     	$scope.$apply();
     };
-    $scope.embed = function(){
-        console.log($scope.infoDataURL);
-        console.log($scope.coverDataURL);
+
+    $scope.embedZipPng = new JSZip();
+    $scope.embedZipBmp = new JSZip();
+    $scope.embed_tasks.processing = 0;
+
+    $scope.$watch('embed_tasks.processing', function(){
+        if ($scope.embed_tasks.processing === 0) {
+            $scope.embedZipPngLink = URL.createObjectURL($scope.embedZipPng.generate({type:"blob"}));
+             $scope.embedZipBmpLink = URL.createObjectURL($scope.embedZipBmp.generate({type:"blob"}));
+        }
+        $scope.embedProcessingPercent = (($scope.embed_tasks.length-$scope.embed_tasks.processing)*100/$scope.embed_tasks.length)>>0;
+    });
+
+    $scope.embed = function(callback){
     	if ($scope.infoDataURL && $scope.coverDataURL) {
+            $scope.embedZipPngLink = false;
+            $scope.embedZipBmpLink = false;
+            $scope.embed_tasks.processing++;
     		var task = {
     			width: $scope.cover_width,
     			height: $scope.cover_height,
     			size: $scope.info_size,
                 algorithm: $scope.algorithms[$scope.selections.embed_algorithm].name,
                 org: $scope.coverDataURL,
-                name: $scope.cover_name.substring(0, $scope.cover_name.length-4) + '_ste.'
+                name: $scope.cover_name.substring(0, $scope.cover_name.length-4) + '.'+$scope.info_name.substring(0, $scope.info_name.lastIndexOf('.'))+'.'
     		}
-    		$scope.embed_tasks.push(task);
+    		$scope.embed_tasks.unshift(task);
     		if (task.size < $scope.cover_max_info_size) {
 	    		$http.post('/api/embed', {
 	    			algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
@@ -328,6 +352,14 @@ angular.module('se10th20132App')
                     password: $scope.s.cover_password
 		    	}).then(function(data){
                     task.image_link = 'data:image/png;base64,' + data.data.data;
+                    
+                    if ($scope.embedZipPng.file(task.name+'png')){
+                            $scope.embedZipPng.file(task.name+Date.now()+'.png', data.data.data, {base64: true});
+                        } else {
+                            $scope.embedZipPng.file(task.name+'png', data.data.data, {base64: true});
+                        }
+                    
+
 		    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
                     task.paletted = data.data.paletted;
                     var img = new Image;
@@ -337,13 +369,22 @@ angular.module('se10th20132App')
                         canvas.height = img.height;
                         var context = canvas.getContext('2d');
                         context.drawImage(img, 0, 0, img.width, img.height);
-                        task.bmpLink = URL.createObjectURL(b64toBlob(buildBMP(canvas), 'image/bmp'));
+                        var bmpLink = buildBMP(canvas);
+                        if ($scope.embedZipBmp.file(task.name+'bmp')){
+                            $scope.embedZipBmp.file(task.name+Date.now()+'.bmp', bmpLink, {base64: true});
+                        } else {
+                            $scope.embedZipBmp.file(task.name+'bmp', bmpLink, {base64: true});
+                        }
+
+                        task.bmpLink = URL.createObjectURL(b64toBlob(bmpLink, 'image/bmp'));
                         $scope.$apply();
                     }
                     task.psnr = data.data.psnr;
                     img.src = task.image_link;
 		    		avg_psnr_fn();
+                    $scope.embed_tasks.processing--;
 		    	}, function(data){
+                    $scope.embed_tasks.processing--;
 		    		switch(data.data.message){
 		    			case 'WRONG_FILE_TYPE':
 		    			case 'NOT_PALETTED':
@@ -359,12 +400,18 @@ angular.module('se10th20132App')
 		    		}
                     $scope.$apply();
 		    	});
-		    } else task.fail = 'File too big!';
+		    } else {
+                task.fail = 'File too big!';
+            }
+            if (callback) callback();
             $scope.$apply();
     	}
-    }
-    $scope.$watch('container', function(file){
-        if (validImage(file.name)){
+    };
+    $scope.$watch('container', containerHandler);
+    function containerHandler (files){
+        var file;
+        if (files.length) file = files.shift();
+        if (file && validImage(file.name)){
         	var reader = new FileReader();
             reader.onload = function (loadEvent) {
                 $scope.containerDataURL = loadEvent.target.result;
@@ -382,21 +429,21 @@ angular.module('se10th20132App')
                     }
                     $scope.container_src = $scope.containerDataURL;
                 	$scope.$apply();
-                    $scope.decode();
+                    $scope.decode(function(){
+                        containerHandler(files);
+                    });
     			};
                 img.src = $scope.containerDataURL;
             }
-            if (file) {
-            	$scope.container_name = file.name;
-            	reader.readAsDataURL(file);
-            }
+        	$scope.container_name = file.name;
+        	reader.readAsDataURL(file);
         }
-    });
+    };
 
     $scope.$watch('containerDataURL', $scope.decode);
 
     $scope.decode_tasks = [];
-    $scope.decode = function(){
+    $scope.decode = function(callback){
     	if ($scope.containerDataURL) {
     		var task = {
     			width: $scope.container_width,
@@ -432,22 +479,42 @@ angular.module('se10th20132App')
 	    		}
                 if (data.data.error) console.log(data.data.error)
 	    	});
+            if(callback) callback();
     	}
     }
     $scope.random_tasks = []
+    $scope.embedZipData = new JSZip();
+    $scope.random_tasks.processing = 0;
+    $scope.$watch('random_tasks.processing', function(){
+        if ($scope.random_tasks.processing === 0) {
+            $scope.embedZipDataLink = URL.createObjectURL($scope.embedZipData.generate({type:"blob"}));
+        }
+        $scope.randomProcessingPercent = (($scope.random_tasks.length-$scope.random_tasks.processing)*100/$scope.random_tasks.length)>>0;
+    })
     $scope.generate = function(){
         if (!isNaN(parseFloat($scope.s.random_size)) && isFinite($scope.s.random_size)) {
+            $scope.random_tasks.processing++;
             var task = {
                 size: $scope.s.random_size
             }
+            $scope.embedZipDataLink = false;
             if (task.size < 5 * 1024 && task.size > 0) {
                 $scope.random_tasks.push(task);
                 $http.post('/api/randomFile', {
                     kb: task.size,
                 }).then(function(data){
+                    $scope.random_tasks.processing--;
+                    
+                    $scope.embedZipData.file('data_'+task.size+'kb.bin', data.data.file, {base64: true});
+                    if ($scope.embedZipData.file('data_'+task.size+'kb.bin')){
+                        $scope.embedZipData.file('data_'+task.size+'kb.'+Date.now()+'.bin', data.data.file, {base64: true});
+                    } else {
+                        $scope.embedZipData.file('data_'+task.size+'kb.bin', data.data.file, {base64: true});
+                    }
                     task.link = URL.createObjectURL(b64toBlob(data.data.file));
                     $scope.$apply();
                 }, function(data){
+                    $scope.random_tasks.processing--;
                     task.fail = 'FAILED';
                     $scope.$apply();
                 });

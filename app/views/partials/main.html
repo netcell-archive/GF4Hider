@@ -3,11 +3,11 @@
     <div class="title">PNG STEGANOGRAPHY</div>
     <div class="description">
       <p>This application allows embedding a file into a png or bmp image, returning a pair of png and bmp files, and extracting embedded files from them. Notice that, the bmp file received when the input is a paletted png cannot be used to extract information, since the palette has been omitted.</p>
-      <p>You can drop files into the boxes or click on the boxes to select files. By choosing an image file on the left box of the EMBED section, you will see the maximum capacity for embedding file on the box beside. Under the boxes are options including password and algorithm. Password is optional. The request will be made automatically when all required files are selected. If you want to request with a new password, push the button on the right hand side (Embed or Extract) to make a new request.</p>
+      <p>You can drop one or more files into the boxes or click on the boxes to select files. By choosing image file on the left box of the EMBED section, you will see the maximum capacity for embedding file on the box beside. Under the boxes are options including password and algorithm. Password is optional. The request will be made automatically when all required files are selected. If you want to request with a new password, push the button on the right hand side (Embed or Extract) to make a new request.</p>
       <p>All requests will be displayed as a list of waiting processes. You may make more requests while waiting for results.</p>
     </div>
   </div>
-  <div class="block">
+  <div class="block" ng-init="embedShowResult = false">
     <div class="title">EMBED</div>
     <div class="file">
         <div class="drop" file="cover">
@@ -30,11 +30,31 @@
       <span class ="selection" 
         ng-class  ="{selected: $index === selections.embed_algorithm}" 
         ng-repeat ="algorithm in algorithms track by $index" 
-        ng-click  ="selections.embed_algorithm = $index; updateCoverMaxInfoSize()">{{algorithm.name}}</span>
+        ng-click  ="selections.embed_algorithm = $index; updateCoverMaxInfoSize()">{{algorithm.name}}
+      </span>
+      <span class="selection" style="float: right; margin-left: 5px"
+        ng-class  ="{selected: embedShowResult}"
+        ng-click="embedShowResult = !embedShowResult">Show Result</span>
       <span class="button" ng-click="embed()">Embed</span>
     </div>
     <div class="result" ng-if="embed_tasks.length">
       <div class="title row">
+        <span class="col width">Items:</span>
+        <span class="col height">{{embed_tasks.length}}</span>
+        <span class="col size">Processing:</span>
+        <span class="col algorithm">
+          <span ng-show="embed_tasks.processing">{{embedProcessingPercent}}%</span>
+          <span ng-show="!embed_tasks.processing">Done</span>
+        </span>
+        <span class="col link">
+          <a href="{{embedZipPngLink}}" ng-show="embedZipPngLink" download="pngs.zip">all png</a>
+        </span>
+        <span class="col link">
+          <a href="{{embedZipBmpLink}}" ng-show="embedZipBmpLink" download="bmps.zip">all bmp</a>
+        </span>
+        <span class="col psnr">{{avg_psnr.toFixed(1)}}</span>
+      </div>
+      <div class="title row" ng-if="embedShowResult">
         <span class="col width">width</span>
         <span class="col height">height</span>
         <span class="col size">size</span>
@@ -43,7 +63,7 @@
         <span class="col link"></span>
         <span class="col psnr">psnr</span>
       </div>
-      <div class="row" 
+      <div class="row" ng-if="embedShowResult"
         ng-repeat="task in embed_tasks track by $index"
         ng-click="s.preview = true; s.preview_emb_src = task.image_link; s.preview_org_src = task.org">
         <span class="col width">{{task.width}} px</span>
@@ -57,19 +77,9 @@
         </span>
         <span class="col link">
           <a href={{task.bmpLink}} ng-show="task.bmpLink"  download="{{task.name+'bmp'}}">bmp</a>
-          <span ng-show="task.link && !task.bmpLink && !task.paletted">Processing...</span>
-          <span ng-show="task.link && !task.bmpLink && task.paletted">Paletted!</span>
+          <span ng-show="task.link && !task.bmpLink">Processing...</span>
         </span>
         <span class="col psnr">{{task.psnr.toFixed(1)}}</span>
-      </div>
-      <div class="title row">
-        <span class="col width"></span>
-        <span class="col height"></span>
-        <span class="col size"></span>
-        <span class="col algorithm"></span>
-        <span class="col link"></span>
-        <span class="col link">average</span>
-        <span class="col psnr">{{avg_psnr.toFixed(1)}}</span>
       </div>
     </div>
     <div class="file preview" ng-class="{'preview-show': s.preview}" ng-click="s.preview = !s.preview">
@@ -130,24 +140,36 @@
       </div>
     </div>
   </div>
-  <div class="block">
+  <div class="block" ng-init="randomShowResult = false">
     <div class="title">Random File</div>
     <div class="password">
+      <span class="selection"
+        ng-class  ="{selected: randomShowResult}"
+        ng-click="randomShowResult = !randomShowResult">Show Result</span>
       <span>Size: </span>
       <input type="text" ng-model="s.random_size"/>
       <span class="button" ng-click="generate()">Generate</span>
     </div>
     <div class="result" ng-if="random_tasks.length">
       <div class="title row">
+        <span class="col width">Items: {{random_tasks.length}}; Processing: 
+          <span ng-show="random_tasks.processing">{{randomProcessingPercent}}%</span>
+          <span ng-show="!random_tasks.processing">Done</span>
+        </span>
+        <span class="col link">
+          <a href="{{embedZipDataLink}}" ng-show="embedZipDataLink" download="bins.zip">all data</a>
+          <span ng-show="!embedZipDataLink">Processing...</span>
+        </span>
+      </div>
+      <div class="title row" ng-if="randomShowResult">
         <span class="col width">size</span>
         <span class="col link">link</span>
       </div>
-      <div class="row" ng-class="{fail: task.fail}" ng-repeat="task in random_tasks track by $index">
+      <div class="row"  ng-if="randomShowResult" ng-class="{fail: task.fail}" ng-repeat="task in random_tasks track by $index">
         <span class="col width">{{task.size}} b</span>
         <span class="col link">
           <a href={{task.link}} ng-show="task.link" target="_blank" download="data_{{task.size}}kb.bin">download</a>
           <span class="fail" ng-show="task.fail">{{task.fail}}</span>
-          <span class="fail" ng-show="!task.fail && !task.link">Processing...</span>
         </span>
       </div>
     </div>
