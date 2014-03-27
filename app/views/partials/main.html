@@ -38,7 +38,8 @@
       <span class="button" ng-click="embed()">Embed</span>
     </div>
     <div class="result" ng-if="embed_tasks.length">
-      <div class="title row">
+      <div class="row">
+        <span class="col name"></span>
         <span class="col width">Items:</span>
         <span class="col height">{{embed_tasks.length}}</span>
         <span class="col size">Processing:</span>
@@ -55,6 +56,7 @@
         <span class="col psnr">{{avg_psnr.toFixed(1)}}</span>
       </div>
       <div class="title row" ng-if="embedShowResult">
+        <span class="col name">name</span>
         <span class="col width">width</span>
         <span class="col height">height</span>
         <span class="col size">size</span>
@@ -66,6 +68,7 @@
       <div class="row" ng-if="embedShowResult"
         ng-repeat="task in embed_tasks track by $index"
         ng-click="s.preview = true; s.preview_emb_src = task.image_link; s.preview_org_src = task.org">
+        <span class="col name">{{task.name}}</span>
         <span class="col width">{{task.width}} px</span>
         <span class="col height">{{task.height}} px</span>
         <span class="col size">{{task.size}} b</span>
@@ -151,7 +154,7 @@
       <span class="button" ng-click="generate()">Generate</span>
     </div>
     <div class="result" ng-if="random_tasks.length">
-      <div class="title row">
+      <div class="row">
         <span class="col width">Items: {{random_tasks.length}}; Processing: 
           <span ng-show="random_tasks.processing">{{randomProcessingPercent}}%</span>
           <span ng-show="!random_tasks.processing">Done</span>

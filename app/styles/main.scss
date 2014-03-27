@@ -252,11 +252,14 @@ body {
                 padding: 5px 10px;
                 display: table-cell;
                 width: auto;
+                &.name {
+                    width: 120px;
+                }
                 &.psnr {
                     width: 75px;
                 }
                 &.algorithm {
-                    width: 200px;
+                    width: 100px;
                 }
                 &.link {
                     width: 75px;
