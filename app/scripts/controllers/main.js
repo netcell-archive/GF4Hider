@@ -246,11 +246,19 @@ angular.module('se10th20132App')
     $scope.updateCoverMaxInfoSize = function(){};
 
   	$scope.notpaletted = true;
-    $scope.$watch('cover', coverHandler);
+    $scope.cover_queue = [];
+    $scope.info_queue  = [];
 
-    function coverHandler(files){
-        var file;
-        if (files.length) file = files.shift();
+    $scope.$watch('cover', function(files){
+        $scope.cover_queue = files;
+    });
+    $scope.$watch('info', function(files){
+        $scope.info_queue = files;
+    });
+
+    function coverHandler(file, callback){
+        // var file;
+        // if (files.length) file = files.shift();
         if (file && validImage(file.name)) {
             $scope.notpaletted = false;
             var reader = new FileReader();
@@ -272,22 +280,20 @@ angular.module('se10th20132App')
                         context.drawImage(img, 0, 0, imwidth, imheight);
                         $scope.coverDataURL = canvas.toDataURL();
                     }
-                    $scope.updateCoverMaxInfoSize = function(){
-                        $scope.cover_max_info_size = maxhide(imwidth, imheight, $scope.algorithms[$scope.selections.embed_algorithm].blockLength, $scope.algorithms[$scope.selections.embed_algorithm].infoBlockLength);
-                        $http.post('/api/maxInfoSize', {
-                            algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
-                            cover: $scope.coverDataURL,
-                        }).then(function(data){
-                            $scope.cover_max_info_size_prefix = '';
-                            $scope.cover_max_info_size = data.data.availableSpace_ForEmbedding;
-                            $scope.$apply();
-                        });
-                    };
-                    $scope.updateCoverMaxInfoSize();
+                    // $scope.updateCoverMaxInfoSize = function(){
+                    //     $scope.cover_max_info_size = maxhide(imwidth, imheight, $scope.algorithms[$scope.selections.embed_algorithm].blockLength, $scope.algorithms[$scope.selections.embed_algorithm].infoBlockLength);
+                    //     $http.post('/api/maxInfoSize', {
+                    //         algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
+                    //         cover: $scope.coverDataURL,
+                    //     }).then(function(data){
+                    //         $scope.cover_max_info_size_prefix = '';
+                    //         $scope.cover_max_info_size = data.data.availableSpace_ForEmbedding;
+                    //         $scope.$apply();
+                    //     });
+                    // };
+                    // $scope.updateCoverMaxInfoSize();
                     $scope.$apply();
-                    $scope.embed(function(){
-                        coverHandler(files);
-                    });
+                    if (callback) callback();
                 };
                 $scope.cover_src = $scope.coverDataURL;
                 img.src = $scope.coverDataURL;
@@ -297,19 +303,15 @@ angular.module('se10th20132App')
         }
     };
 
-    $scope.$watch('info', infoHandler);
-
-    function infoHandler(files){
-        var file;
-        if (files.length) file = files.shift();
+    function infoHandler(file, callback){
+        // var file;
+        // if (files.length) file = files.shift();
         if (file) {
 	    	var reader = new FileReader();
 	        reader.onload = function (loadEvent) {
 	            $scope.infoDataURL = loadEvent.target.result;
 	            $scope.$apply();
-                $scope.embed(function(){
-                    infoHandler(files);
-                });
+                if (callback) callback();
 	        }
         	$scope.info_name = file.name;
         	$scope.info_size = file.size;
@@ -338,10 +340,22 @@ angular.module('se10th20132App')
     $scope.$watch('embed_tasks.processing', function(){
         if ($scope.embed_tasks.processing === 0) {
             $scope.embedZipPngLink = URL.createObjectURL($scope.embedZipPng.generate({type:"blob"}));
-             $scope.embedZipBmpLink = URL.createObjectURL($scope.embedZipBmp.generate({type:"blob"}));
+            //$scope.embedZipBmpLink = URL.createObjectURL($scope.embedZipBmp.generate({type:"blob"}));
         }
         $scope.embedProcessingPercent = (($scope.embed_tasks.length-$scope.embed_tasks.processing)*100/$scope.embed_tasks.length)>>0;
     });
+
+    $scope.runEmbed = function(){
+        if ($scope.cover_queue && $scope.info_queue && $scope.cover_queue.length === $scope.info_queue.length){
+            coverHandler($scope.cover_queue.shift(), function(){
+                infoHandler($scope.info_queue.shift(), function(){
+                    $scope.embed(function(){
+                        $scope.runEmbed();
+                    });
+                });
+            });
+        }
+    }
 
     $scope.embed = function(callback){
     	if ($scope.infoDataURL && $scope.coverDataURL) {
@@ -357,7 +371,7 @@ angular.module('se10th20132App')
                 name: $scope.cover_name.substring(0, $scope.cover_name.length-4) + '.'+$scope.info_name.substring(0, $scope.info_name.lastIndexOf('.'))+'.'
     		}
     		$scope.embed_tasks.unshift(task);
-    		if (task.size < $scope.cover_max_info_size) {
+    		if (true){//task.size < $scope.cover_max_info_size) {
 	    		$http.post('/api/embed', {
 	    			algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
 	    			cover: $scope.coverDataURL,
@@ -375,28 +389,28 @@ angular.module('se10th20132App')
                         }
                     
 
-		    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
+		    		//task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
                     task.paletted = data.data.paletted;
-                    var img = new Image;
-                    img.onload = function(){
-                        var canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        var context = canvas.getContext('2d');
-                        context.drawImage(img, 0, 0, img.width, img.height);
-                        var bmpLink = buildBMP(canvas);
-                        if ($scope.embedZipBmp.file(task.name+'bmp')){
-                            $scope.embedZipBmp.file(task.name+Date.now()+'.bmp', bmpLink, {base64: true});
-                        } else {
-                            $scope.embedZipBmp.file(task.name+'bmp', bmpLink, {base64: true});
-                        }
+                    //var img = new Image;
+                    // img.onload = function(){
+                    //     var canvas = document.createElement('canvas');
+                    //     canvas.width = img.width;
+                    //     canvas.height = img.height;
+                    //     var context = canvas.getContext('2d');
+                    //     context.drawImage(img, 0, 0, img.width, img.height);
+                    //     var bmpLink = buildBMP(canvas);
+                    //     if ($scope.embedZipBmp.file(task.name+'bmp')){
+                    //         $scope.embedZipBmp.file(task.name+Date.now()+'.bmp', bmpLink, {base64: true});
+                    //     } else {
+                    //         $scope.embedZipBmp.file(task.name+'bmp', bmpLink, {base64: true});
+                    //     }
 
-                        task.bmpLink = URL.createObjectURL(b64toBlob(bmpLink, 'image/bmp'));
-                        $scope.$apply();
-                    }
+                    //     task.bmpLink = URL.createObjectURL(b64toBlob(bmpLink, 'image/bmp'));
+                    //     $scope.$apply();
+                    // }
                     task.psnr = data.data.psnr;
-                    img.src = task.image_link;
-		    		avg_psnr_fn();
+                    //img.src = task.image_link;
+		    		//avg_psnr_fn();
                     $scope.embed_tasks.processing--;
 		    	}, function(data){
                     $scope.embed_tasks.processing--;
