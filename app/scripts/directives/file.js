@@ -23,7 +23,7 @@ angular.module('se10th20132App')
                 for (var i = 0; i < files.length; i++) {
                     file.push(files[i]);
                 };
-                scope.file = file;
+                scope.file = files[0];
                 scope.$apply();
             });
             el.on('click', function(){
@@ -56,7 +56,7 @@ angular.module('se10th20132App')
                 for (var i = 0; i < files.length; i++) {
                     file.push(files[i]);
                 };
-                scope.file = file;
+                scope.file = files[0];
                 scope.$apply();
             });
             $(document).on('dragenter', function (e) 

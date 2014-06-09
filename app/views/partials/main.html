@@ -7,7 +7,7 @@
       <p>All requests will be displayed as a list of waiting processes. You may make more requests while waiting for results.</p>
     </div>
   </div>
-  <div class="block" ng-init="embedShowResult = false">
+  <div class="block" ng-init="embedShowResult = true">
     <div class="title">EMBED</div>
     <div class="file">
         <div class="drop" file="cover">
@@ -22,24 +22,27 @@
           <div ng-show="info_name">{{info_name}}</div>
         </div>
     </div>
-    <div class="password">
+    <!-- <div class="password">
       <span>Password: </span>
       <input type="text" ng-model="s.cover_password"/>
-    </div>
+    </div> -->
     <div class="selections">
-      <span class ="selection" 
+      <!-- <span class ="selection" 
         ng-class  ="{selected: $index === selections.embed_algorithm}" 
         ng-repeat ="algorithm in algorithms track by $index" 
         ng-click  ="selections.embed_algorithm = $index; updateCoverMaxInfoSize()">{{algorithm.name}}
-      </span>
-      <span class="selection" style="float: right; margin-left: 5px"
-        ng-class  ="{selected: embedShowResult}"
+      </span> -->
+      <span class="selection selected" style="float: right; margin-left: 5px"
+        ng-show="!embedShowResult"
         ng-click="embedShowResult = !embedShowResult">Show Result</span>
+      <span class="selection" style="float: right; margin-left: 5px"
+        ng-show="embedShowResult"
+        ng-click="embedShowResult = !embedShowResult">Hide Result</span>
       <span class="button" ng-click="runEmbed()">Embed</span>
     </div>
     <div class="result" ng-if="embed_tasks.length">
       <div class="row">
-        <span class="col name"></span>
+        <!-- <span class="col name"></span> -->
         <span class="col width">Items:</span>
         <span class="col height">{{embed_tasks.length}}</span>
         <span class="col size">Processing:</span>
@@ -60,7 +63,7 @@
         <span class="col width">width</span>
         <span class="col height">height</span>
         <span class="col size">size</span>
-        <span class="col algorithm">algorithm</span>
+        <!-- <span class="col algorithm">algorithm</span> -->
         <span class="col link">download</span>
         <span class="col link"></span>
         <span class="col psnr">psnr</span>
@@ -72,7 +75,7 @@
         <span class="col width">{{task.width}} px</span>
         <span class="col height">{{task.height}} px</span>
         <span class="col size">{{task.size}} b</span>
-        <span class="col algorithm">{{task.algorithm}}</span>
+        <!-- <span class="col algorithm">{{task.algorithm}}</span> -->
         <span class="col link">
           <a href={{task.link}} ng-show="task.link" download="{{task.name+'png'}}">png</a>
           <span class="fail" ng-show="task.fail">{{task.fail}}</span>
@@ -94,7 +97,7 @@
           <img id='res-preview' src="{{s.preview_emb_src}}"></img>
         </div>
     </div>
-    <!-- <div class="file analyze" ng-class="{'analyze-show': s.preview}" ng-click = "s.preview = !s.preview">
+    <div class="file analyze" ng-class="{'analyze-show': s.preview}" ng-click = "s.preview = !s.preview">
         <div class="drop">
           <canvas id="org-analyze"></canvas>
         </div>
@@ -102,7 +105,7 @@
         <div class="drop">
           <canvas id="res-analyze"></canvas>
         </div>
-    </div> -->
+    </div>
   </div>
 
   <div class="block">
@@ -113,15 +116,15 @@
           <img ng-show="container_name" src="{{container_src}}" image="container_img"></img>
         </div>
     </div>
-    <div class="password">
+    <!-- <div class="password">
       <span>Password: </span>
       <input type="text" ng-model="s.decode_password"/>
-    </div>
+    </div> -->
     <div class="selections">
-      <span class ="selection" 
+      <!-- <span class ="selection" 
         ng-class  ="{selected: $index === selections.decode_algorithm}" 
         ng-repeat ="algorithm in algorithms track by $index" 
-        ng-click  ="selections.decode_algorithm = $index">{{algorithm.name}}</span>
+        ng-click  ="selections.decode_algorithm = $index">{{algorithm.name}}</span> -->
       <span class="button" ng-click="decode()">Extract</span>
     </div>
     <div class="result" ng-if="decode_tasks.length">

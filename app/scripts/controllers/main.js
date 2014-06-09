@@ -212,23 +212,23 @@ angular.module('se10th20132App')
             canvasctx.putImageData(imageData, 0, 0);
         }
 
-        // var org = $('#org-analyze')[0],
-        //     orgctx = org.getContext('2d'),
-        //     res = $('#res-analyze')[0],
-        //     resctx = res.getContext('2d'),
-        //     orgimg = $('#org-preview')[0],
-        //     resimg = $('#res-preview')[0];
+        var org = $('#org-analyze')[0],
+            orgctx = org.getContext('2d'),
+            res = $('#res-analyze')[0],
+            resctx = res.getContext('2d'),
+            orgimg = $('#org-preview')[0],
+            resimg = $('#res-preview')[0];
 
-        // orgimg.onload = function(){
-        //     visualAttack(org, orgimg, orgctx);
-        // };
+        orgimg.onload = function(){
+            visualAttack(org, orgimg, orgctx);
+        };
 
-        // resimg.onload = function(){
-        //     visualAttack(res, resimg, resctx);
-        // };
+        resimg.onload = function(){
+            visualAttack(res, resimg, resctx);
+        };
 
     $scope.algorithms = [{
-        name: 'GF4 Module',
+        name: 'PTH(1,5,4)',
         key:  'F2',
         blockLength: 5,
         infoBlockLength: 4
@@ -249,11 +249,13 @@ angular.module('se10th20132App')
     $scope.cover_queue = [];
     $scope.info_queue  = [];
 
-    $scope.$watch('cover', function(files){
-        $scope.cover_queue = files;
+    $scope.$watch('cover', function(file){
+        //$scope.cover_queue = files;
+        coverHandler(file);
     });
-    $scope.$watch('info', function(files){
-        $scope.info_queue = files;
+    $scope.$watch('info', function(file){
+        //$scope.info_queue = files;
+        infoHandler(file);
     });
 
     function coverHandler(file, callback){
@@ -280,18 +282,18 @@ angular.module('se10th20132App')
                         context.drawImage(img, 0, 0, imwidth, imheight);
                         $scope.coverDataURL = canvas.toDataURL();
                     }
-                    // $scope.updateCoverMaxInfoSize = function(){
-                    //     $scope.cover_max_info_size = maxhide(imwidth, imheight, $scope.algorithms[$scope.selections.embed_algorithm].blockLength, $scope.algorithms[$scope.selections.embed_algorithm].infoBlockLength);
-                    //     $http.post('/api/maxInfoSize', {
-                    //         algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
-                    //         cover: $scope.coverDataURL,
-                    //     }).then(function(data){
-                    //         $scope.cover_max_info_size_prefix = '';
-                    //         $scope.cover_max_info_size = data.data.availableSpace_ForEmbedding;
-                    //         $scope.$apply();
-                    //     });
-                    // };
-                    // $scope.updateCoverMaxInfoSize();
+                    $scope.updateCoverMaxInfoSize = function(){
+                        $scope.cover_max_info_size = maxhide(imwidth, imheight, $scope.algorithms[$scope.selections.embed_algorithm].blockLength, $scope.algorithms[$scope.selections.embed_algorithm].infoBlockLength);
+                        $http.post('/api/maxInfoSize', {
+                            algorithm: $scope.algorithms[$scope.selections.embed_algorithm].key,
+                            cover: $scope.coverDataURL,
+                        }).then(function(data){
+                            $scope.cover_max_info_size_prefix = '';
+                            $scope.cover_max_info_size = data.data.availableSpace_ForEmbedding;
+                            $scope.$apply();
+                        });
+                    };
+                    $scope.updateCoverMaxInfoSize();
                     $scope.$apply();
                     if (callback) callback();
                 };
@@ -346,15 +348,15 @@ angular.module('se10th20132App')
     });
 
     $scope.runEmbed = function(){
-        if ($scope.cover_queue && $scope.info_queue && $scope.cover_queue.length === $scope.info_queue.length){
-            coverHandler($scope.cover_queue.shift(), function(){
-                infoHandler($scope.info_queue.shift(), function(){
-                    $scope.embed(function(){
-                        $scope.runEmbed();
-                    });
-                });
-            });
-        }
+        //if ($scope.cover_queue && $scope.info_queue){// && $scope.cover_queue.length === $scope.info_queue.length){
+        //    coverHandler($scope.cover_queue, function(){//.shift(), function(){
+        //        infoHandler($scope.info_queue, function(){//.shift(), function(){
+                    $scope.embed();//function(){
+                        //$scope.runEmbed();
+                    //});
+        //        });
+        //    });
+        //}
     }
 
     $scope.embed = function(callback){
@@ -389,28 +391,28 @@ angular.module('se10th20132App')
                         }
                     
 
-		    		//task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
+		    		task.link = URL.createObjectURL(b64toBlob(data.data.data, 'image/png'));
                     task.paletted = data.data.paletted;
-                    //var img = new Image;
-                    // img.onload = function(){
-                    //     var canvas = document.createElement('canvas');
-                    //     canvas.width = img.width;
-                    //     canvas.height = img.height;
-                    //     var context = canvas.getContext('2d');
-                    //     context.drawImage(img, 0, 0, img.width, img.height);
-                    //     var bmpLink = buildBMP(canvas);
-                    //     if ($scope.embedZipBmp.file(task.name+'bmp')){
-                    //         $scope.embedZipBmp.file(task.name+Date.now()+'.bmp', bmpLink, {base64: true});
-                    //     } else {
-                    //         $scope.embedZipBmp.file(task.name+'bmp', bmpLink, {base64: true});
-                    //     }
+                    var img = new Image;
+                    img.onload = function(){
+                        var canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        var context = canvas.getContext('2d');
+                        context.drawImage(img, 0, 0, img.width, img.height);
+                        var bmpLink = buildBMP(canvas);
+                        if ($scope.embedZipBmp.file(task.name+'bmp')){
+                            $scope.embedZipBmp.file(task.name+Date.now()+'.bmp', bmpLink, {base64: true});
+                        } else {
+                            $scope.embedZipBmp.file(task.name+'bmp', bmpLink, {base64: true});
+                        }
 
-                    //     task.bmpLink = URL.createObjectURL(b64toBlob(bmpLink, 'image/bmp'));
-                    //     $scope.$apply();
-                    // }
+                        task.bmpLink = URL.createObjectURL(b64toBlob(bmpLink, 'image/bmp'));
+                        $scope.$apply();
+                    }
                     task.psnr = data.data.psnr;
-                    //img.src = task.image_link;
-		    		//avg_psnr_fn();
+                    img.src = task.image_link;
+		    		avg_psnr_fn();
                     $scope.embed_tasks.processing--;
 		    	}, function(data){
                     $scope.embed_tasks.processing--;
@@ -437,9 +439,9 @@ angular.module('se10th20132App')
     	}
     };
     $scope.$watch('container', containerHandler);
-    function containerHandler (files){
-        var file;
-        if (files.length) file = files.shift();
+    function containerHandler (file){
+        //var file;
+        //if (files.length) file = files.shift();
         if (file && validImage(file.name)){
         	var reader = new FileReader();
             reader.onload = function (loadEvent) {
